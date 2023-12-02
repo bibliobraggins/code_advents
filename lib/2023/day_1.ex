@@ -1,28 +1,24 @@
-defmodule Day1_2023 do
+defmodule Advent2023 do
   @data File.stream!("./data/2023/day_1.txt")
 
-  @digits [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39]
+  @symbols [0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39]
 
-  def first_challenge() do
+  def c1() do
     Stream.map(@data, &parse_digits([], &1))
     |> Enum.into(
       [],
-      &("#{List.first(&1)}#{List.last(&1)}"
-        |> String.to_integer())
-    )
-    |> Enum.sum()
+      &([List.first(&1), List.last(&1)]
+        |> List.to_integer() )
+      ) |> Enum.sum()
   end
-
-  defp parse_digit(acc, char),
-    do: acc ++ [char]
 
   @spec parse_digits(list(), binary()) :: list()
   defp parse_digits(acc, <<"">>), do: acc
 
   defp parse_digits(acc, <<symbol::8, tail::binary>>) do
-    case Enum.member?(@digits, symbol) do
+    case Enum.member?(@symbols, symbol) do
       true ->
-        parse_digit(acc, <<symbol::8>>)
+        acc ++ [symbol]
         |> parse_digits(tail)
 
       false ->
@@ -31,55 +27,58 @@ defmodule Day1_2023 do
   end
 
   @test [
-    "sevenfivesixzvpone8f1plj"
+    "eightdgczsgkc5seventlsfd",
+    "xdljsnqjctzmmxcgxctdxxg73four",
+    "2shjqglxct5rctbmgvfvjfvrqsvdmthree",
+    "three71onekbksz8",
+    "ninesevenzrcxnnbvninetwoftsvg39",
+    "twofour36",
+    "oneightwofe890789478392701483921voneoneeight"
   ]
-
-  def second_challenge() do
-    Stream.map(@test, &parse_digits_and_names([], &1))
-    |> Enum.into(
-      [],
-      &("#{List.first(&1)}#{List.last(&1)}"
-        |> String.to_integer())
-    )
+  def c2() do
+    Stream.map(@data, &parse_data(&1))
+    |> Enum.into([],
+      &(
+        "#{String.first(&1)}#{String.last(&1)}"
+        |> String.to_integer()
+      )
+    ) |> Enum.sum()
   end
 
-  def parse_digits_and_names(acc, <<"">>), do: acc
+  def parse_data(line) when is_binary(line), do: parse_chunk(line)
 
-  def parse_digits_and_names(acc, <<symbol, tail>>) do
-    if Enum.member?(@digits, symbol) do
-      parse_digit(acc, <<symbol>>)
-      |> parse_digits_and_names(tail)
-    else
-      parse_digits_and_names(acc, tail)
-    end
-  end
+  defp parse_chunk(<<>>), do: <<>>
 
-  def parse_digits_and_names(acc, <<"zero", tail::binary>>),
-    do: acc ++ ["0"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"one", tail::binary>>),
-    do: acc ++ ["1"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"two", tail::binary>>),
-    do: acc ++ ["2"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"three", tail::binary>>),
-    do: acc ++ ["3"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"four", tail::binary>>),
-    do: acc ++ ["4"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"five", tail::binary>>),
-    do: acc ++ ["5"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"six", tail::binary>>),
-    do: acc ++ ["6"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"seven", tail::binary>>) do
-      IO.puts "77777777777777777777777777777777777"
-      acc ++ ["7"] |> parse_digits_and_names(tail)
-  end
-  def parse_digits_and_names(acc, <<"eight", tail::binary>>),
-    do: acc ++ ["8"] |> parse_digits_and_names(tail)
-  def parse_digits_and_names(acc, <<"nine", tail::binary>>),
-    do: acc ++ ["9"] |> parse_digits_and_names(tail)
+  defp parse_chunk(<<symbol::8, tail::binary>>) when symbol in ?1..?9,
+    do: <<symbol>> <> parse_chunk(tail)
 
-  def parse_digits_and_names(acc, <<_::8, tail::binary>>) do
-    IO.puts "nilnilnilnilnil?"
-    parse_digits_and_names(acc, tail)
-end
+  defp parse_chunk(<<111, 110, 101, tail::binary>>),
+    do: <<0x31>> <> parse_chunk("e" <> tail)
 
+  defp parse_chunk(<<116, 119, 111, tail::binary>>),
+    do: <<0x32>> <> parse_chunk("o" <> tail)
+
+  defp parse_chunk(<<116, 104, 114, 101, 101, tail::binary>>),
+    do: <<0x33>> <> parse_chunk("e" <> tail)
+
+  defp parse_chunk(<<102, 111, 117, 114, tail::binary>>),
+    do: <<0x34>> <> parse_chunk("r" <> tail)
+
+  defp parse_chunk(<<102, 105, 118, 101, tail::binary>>),
+    do: <<0x35>> <> parse_chunk("e" <> tail)
+
+  defp parse_chunk(<<115, 105, 120, tail::binary>>),
+    do: <<0x36>> <> parse_chunk("x" <> tail)
+
+  defp parse_chunk(<<115, 101, 118, 101, 110, tail::binary>>),
+    do: <<0x37>> <> parse_chunk("n" <> tail)
+
+  defp parse_chunk(<<101, 105, 103, 104, 116, tail::binary>>),
+    do: <<0x38>> <> parse_chunk("t" <> tail)
+
+  defp parse_chunk(<<110, 105, 110, 101, tail::binary>>),
+    do: <<0x39>> <> parse_chunk("e" <> tail)
+
+  defp parse_chunk(<<_::8, tail::binary>>),
+    do: parse_chunk(tail)
 end
