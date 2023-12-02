@@ -13,7 +13,6 @@ defmodule Admin2015.Day1 do
       |> Stream.drop(n - 1)
       |> Stream.take(1)
       |> Enum.find_value(& &1)
-
     position
   end
 

@@ -26,15 +26,6 @@ defmodule Advent2023.Day1 do
     end
   end
 
-  @test [
-    "eightdgczsgkc5seventlsfd",
-    "xdljsnqjctzmmxcgxctdxxg73four",
-    "2shjqglxct5rctbmgvfvjfvrqsvdmthree",
-    "three71onekbksz8",
-    "ninesevenzrcxnnbvninetwoftsvg39",
-    "twofour36",
-    "oneightwofe890789478392701483921voneoneeight"
-  ]
   def c2() do
     Stream.map(@data, &parse_data(&1))
     |> Enum.into([],
