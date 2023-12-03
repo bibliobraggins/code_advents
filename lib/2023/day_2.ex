@@ -1,28 +1,57 @@
 defmodule Advent2023.Day2 do
   @data File.stream!("./data/2023/day_2.txt")
 
-
-  @test ["Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green\n"]
-  def test do
-    @test
-    |> Stream.into([], & parse &1)
-    |> Stream.run()
+  defmodule Game do
+    defstruct [
+      :id,
+      :sets
+    ]
   end
 
-  def parse(<<"Game "<><<game::8>> <>": ", tail::binary>>) do
-    String.split(tail, ";")
-    |> parse_sets()
+  def parse(game) do
+    [game, sets] =
+      String.trim(game)
+      |> String.trim_leading("Game ")
+      |> String.split(": ")
+
+    %Game{
+      id: game |> String.to_integer(),
+      sets: parse_sets(sets)
+    }
   end
 
-  def parse_sets([head|tail]) do
-    Enum.into()
+  def parse_sets(sets) do
+    String.split(sets, "; ")
+    |> Enum.into([], &String.split(&1, ", "))
+    |> Enum.into([], &parse_set(&1))
   end
 
-
-  def c1() do
-    @data
-    |> Stream.into([], & IO.inspect &1)
-    |> Stream.run()
+  def parse_set(set) do
+    set
+    |> Enum.into(
+      [],
+      fn s ->
+        [count, color] = String.split(s, " ")
+        {String.to_existing_atom(color), String.to_integer(count)}
+      end
+    )
   end
 
+  @constraints [red: 12, green: 13, blue: 14]
+  def c1 do
+    pipeline(@data)
+  end
+
+  def pipeline(data) do
+    games = Enum.into(data, [], &parse/1)
+
+    Enum.filter(games, fn game -> filter(game.sets) end)
+    |> Enum.into([], fn game -> game.id end)
+  end
+
+  def filter(sets) do
+    Enum.all?(sets, fn set ->
+      Enum.all?(set, fn {color, value} -> value <= @constraints[color] end)
+    end)
+  end
 end
