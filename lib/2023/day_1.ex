@@ -40,35 +40,35 @@ defmodule Advent2023.Day1 do
 
   defp parse_chunk(<<>>), do: <<>>
 
-  defp parse_chunk(<<symbol::8, tail::binary>>) when symbol in ?1..?9,
+  defp parse_chunk(<<symbol::8, tail::binary>>) when symbol in 0x31..0x39,
     do: <<symbol>> <> parse_chunk(tail)
 
-  defp parse_chunk(<<111, 110, 101, tail::binary>>),
-    do: <<0x31>> <> parse_chunk("e" <> tail)
+  defp parse_chunk(<<111::8, 110::8, 101::8, tail::binary>>),
+    do: <<0x31::8>> <> parse_chunk(<<101::8>> <> tail)
 
-  defp parse_chunk(<<116, 119, 111, tail::binary>>),
-    do: <<0x32>> <> parse_chunk("o" <> tail)
+  defp parse_chunk(<<116::8, 119::8, 111::8, tail::binary>>),
+    do: <<0x32::8>> <> parse_chunk(<<111::8>> <> tail)
 
-  defp parse_chunk(<<116, 104, 114, 101, 101, tail::binary>>),
-    do: <<0x33>> <> parse_chunk("e" <> tail)
+  defp parse_chunk(<<116::8, 104::8, 114::8, 101::8, 101::8, tail::binary>>),
+    do: <<0x33::8>> <> parse_chunk(<<101::8>> <> tail)
 
-  defp parse_chunk(<<102, 111, 117, 114, tail::binary>>),
-    do: <<0x34>> <> parse_chunk("r" <> tail)
+  defp parse_chunk(<<102::8, 111::8, 117::8, 114::8, tail::binary>>),
+    do: <<0x34::8>> <> parse_chunk(<<114::8>> <> tail)
 
-  defp parse_chunk(<<102, 105, 118, 101, tail::binary>>),
-    do: <<0x35>> <> parse_chunk("e" <> tail)
+  defp parse_chunk(<<102::8, 105::8, 118::8, 101::8, tail::binary>>),
+    do: <<0x35::8>> <> parse_chunk(<<101::8>> <> tail)
 
-  defp parse_chunk(<<115, 105, 120, tail::binary>>),
-    do: <<0x36>> <> parse_chunk("x" <> tail)
+  defp parse_chunk(<<115::8, 105::8, 120::8, tail::binary>>),
+    do: <<0x36::8>> <> parse_chunk(<<120::8>> <> tail)
 
-  defp parse_chunk(<<115, 101, 118, 101, 110, tail::binary>>),
-    do: <<0x37>> <> parse_chunk("n" <> tail)
+  defp parse_chunk(<<115::8, 101::8, 118::8, 101::8, 110::8, tail::binary>>),
+    do: <<0x37::8>> <> parse_chunk(<<110::8>> <> tail)
 
-  defp parse_chunk(<<101, 105, 103, 104, 116, tail::binary>>),
-    do: <<0x38>> <> parse_chunk("t" <> tail)
+  defp parse_chunk(<<101::8, 105::8, 103::8, 104::8, 116::8, tail::binary>>),
+    do: <<0x38::8>> <> parse_chunk(<<116::8>> <> tail)
 
-  defp parse_chunk(<<110, 105, 110, 101, tail::binary>>),
-    do: <<0x39>> <> parse_chunk("e" <> tail)
+  defp parse_chunk(<<110::8, 105::8, 110::8, 101::8, tail::binary>>),
+    do: <<0x39::8>> <> parse_chunk(<<101::8>> <> tail)
 
   defp parse_chunk(<<_::8, tail::binary>>),
     do: parse_chunk(tail)
