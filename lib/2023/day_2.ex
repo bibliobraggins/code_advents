@@ -49,25 +49,22 @@ defmodule Advent2023.Day2 do
           value <= @constraints[color]
         end)
       end)
-     end)
-     |> Enum.into([], & &1.id)
-     |> Enum.sum()
+    end)
+    |> Enum.into([], & &1.id)
+    |> Enum.sum()
   end
 
   def c2 do
-    games = (@data |> Enum.into([], &parse/1))
+    games = @data |> Enum.into([], &parse/1)
 
-
-    for [{_, v1},{_, v2},{_, v3}] <- Enum.into(games, [], &min_cubes/1) do
-      v1*v2*v3
+    for [{_, v1}, {_, v2}, {_, v3}] <- Enum.into(games, [], &min_cubes/1) do
+      v1 * v2 * v3
     end
     |> Enum.sum()
-
   end
 
   def min_cubes(%Game{id: _id, sets: sets}) do
     s = List.flatten(sets)
-
 
     Enum.reduce(s, [], fn {key, value}, acc ->
       Keyword.update(acc, key, value, fn existing_value ->

@@ -11,7 +11,7 @@ defmodule Advent2023.Day3 do
     "..592.....",
     "......755.",
     "...$.*....",
-    ".664.598..",
+    ".664.598.."
   ]
 
   @special_chars ["-", "*", "/", "#", "&", "+", "@", "=", "$", "%"]
@@ -29,26 +29,39 @@ defmodule Advent2023.Day3 do
         end
       end)
 
-    Enum.into(meta, [], fn {x,y} ->
+    Enum.into(meta, [], fn {x, y} ->
       row = Enum.at(data, y)
+
       y_range =
         case y do
           0 -> 0..1
-          i when i < byte_size(row) -> (i-1)..(i+1)
-          i when i == byte_size(row) -> i-1..(i)
+          i when i < byte_size(row) -> (i - 1)..(i + 1)
+          i when i == byte_size(row) -> (i - 1)..i
         end
-      x_range =
-        case x do
-          0 -> 0..1
-          i when i < byte_size(row) -> (i-1)..(i+1)
-          i when i == byte_size(row) -> i-1..(i)
-        end
-      region =
-        Enum.slice(data, y_range)
-        |> Enum.into([], fn str -> String.slice(str, x_range) end)
 
-      IO.inspect region
+      region = Enum.slice(data, y_range)
+
+      Enum.map(region, fn row_slice ->
+        row_slice
+        |> String.codepoints()
+        |> Enum.chunk_by(fn <<char::utf8>> -> char in ?0..?9 end)
+        |> Enum.filter(fn chunk ->
+          case List.first(chunk) do
+            <<char::utf8>> -> char in ?0..?9
+            _ -> false
+          end
+        end)
+        |> Enum.map(&Enum.join/1)
+      end)
+      |> Enum.filter(fn matches -> length(matches) == 2 end)
+      |> Enum.into([], fn [m1, m2] ->
+        m1 = m1 |> String.to_integer()
+        m2 = m2 |> String.to_integer()
+        m1 * m2
+      end)
     end)
+    |> List.flatten()
+    |> Enum.sum()
   end
 
   def c1 do
@@ -82,15 +95,15 @@ defmodule Advent2023.Day3 do
       end)
     end)
     |> List.flatten()
-    |> Enum.into([], fn {capture, _,_} -> String.to_integer(capture) end)
+    |> Enum.into([], fn {capture, _, _} -> String.to_integer(capture) end)
     |> Enum.sum()
   end
 
   defp safe_range(data, i) do
     case i do
-      0 -> (i)..(i+1)
-      i when i < length(data) -> (i-1)..(i+1)
-      i when i == length(data) -> (i-1)..(i)
+      0 -> i..(i + 1)
+      i when i < length(data) -> (i - 1)..(i + 1)
+      i when i == length(data) -> (i - 1)..i
     end
   end
 
@@ -104,13 +117,13 @@ defmodule Advent2023.Day3 do
   defp do_parse_row(<<digit::utf8, rest::binary>>, index, "", _start_index) when digit in ?0..?9,
     do: do_parse_row(rest, index + 1, <<digit::utf8>>, index)
 
-  defp do_parse_row(<<digit::utf8, rest::binary>>, index, digits, start_index) when digit in ?0..?9,
-    do: do_parse_row(rest, index + 1, digits <> <<digit::utf8>>, start_index)
+  defp do_parse_row(<<digit::utf8, rest::binary>>, index, digits, start_index)
+       when digit in ?0..?9,
+       do: do_parse_row(rest, index + 1, digits <> <<digit::utf8>>, start_index)
 
   defp do_parse_row(<<_::utf8, rest::binary>>, index, "", _start_index),
     do: do_parse_row(rest, index + 1, "", index + 1)
 
   defp do_parse_row(<<_::utf8, rest::binary>>, index, digits, start_index),
     do: [{digits, start_index, index - 1} | do_parse_row(rest, index + 1, "", index + 1)]
-
 end
