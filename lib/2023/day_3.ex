@@ -14,27 +14,49 @@ defmodule Advent2023.Day3 do
     ".664.598..",
   ]
 
-  @special_chars [".", "-", "*", "/", "#", "&", "+", "@", "=", "$", "%"]
+  @special_chars ["-", "*", "/", "#", "&", "+", "@", "=", "$", "%"]
 
-  def test do
-    Stream.with_index(@test)
+  def c1 do
+    Stream.with_index(@data)
     |> Enum.into([], &parse_row/1)
     |> scan()
   end
 
-  def scan(captures) do
-    data = @test|>Enum.into([], &String.codepoints/1)
+  def scan(capture_lists) do
+    data = @data |> Enum.into([], &String.codepoints/1)
 
-    captures =
-      Enum.with_index(captures)|>Enum.filter(fn {captures, _y} -> captures != [] end)
+    capture_lists
+    |> Enum.with_index()
+    |> Enum.filter(fn {capture_list, _y} -> capture_list != [] end)
+    |> Enum.map(fn {capture_list, y} ->
+      y_range = safe_range(data, y)
 
+      capture_list
+      |> Enum.filter(fn {capture, x_first, x_last} ->
+        x_first = if x_first == 0, do: 0, else: x_first - 1
+        x_last = if x_last == length(Enum.at(data, y)), do: x_last, else: x_last + 1
 
+        x = Range.new(x_first, x_last)
+
+        region =
+          Enum.slice(data, y_range)
+          |> Enum.map(fn r -> Enum.slice(r, x) end)
+          |> List.flatten()
+
+        Enum.any?(region, fn char -> Enum.member?(@special_chars, char) end)
+      end)
+    end)
+    |> List.flatten()
+    |> Enum.into([], fn {capture, _,_} -> String.to_integer(capture) end)
+    |> Enum.sum()
   end
 
-
-
-  defp safe_slice(list, start, finish) do
-    Enum.slice(list, max(0, start), max(0, finish - start + 1))
+  defp safe_range(data, i) do
+    case i do
+      0 -> (i)..(i+1)
+      i when i < length(data) -> (i-1)..(i+1)
+      i when i == length(data) -> (i-1)..(i)
+    end
   end
 
   @spec parse_row({binary(), any()}) :: [{bitstring(), non_neg_integer(), integer()}]
