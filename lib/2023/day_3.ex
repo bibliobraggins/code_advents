@@ -16,13 +16,48 @@ defmodule Advent2023.Day3 do
 
   @special_chars ["-", "*", "/", "#", "&", "+", "@", "=", "$", "%"]
 
+  def c2 do
+    data =
+      @test |> Enum.into([], & &1)
+
+    meta =
+      Enum.with_index(data)
+      |> Enum.flat_map(fn {line, y} ->
+        case String.split(line, "", trim: true) |> Enum.find_index(&(&1 == "*")) do
+          nil -> []
+          x -> [{x, y}]
+        end
+      end)
+
+    Enum.into(meta, [], fn {x,y} ->
+      row = Enum.at(data, y)
+      y_range =
+        case y do
+          0 -> 0..1
+          i when i < byte_size(row) -> (i-1)..(i+1)
+          i when i == byte_size(row) -> i-1..(i)
+        end
+      x_range =
+        case x do
+          0 -> 0..1
+          i when i < byte_size(row) -> (i-1)..(i+1)
+          i when i == byte_size(row) -> i-1..(i)
+        end
+      region =
+        Enum.slice(data, y_range)
+        |> Enum.into([], fn str -> String.slice(str, x_range) end)
+
+      IO.inspect region
+    end)
+  end
+
   def c1 do
     Stream.with_index(@data)
     |> Enum.into([], &parse_row/1)
-    |> scan()
+    |> scan1()
   end
 
-  def scan(capture_lists) do
+  def scan1(capture_lists) do
     data = @data |> Enum.into([], &String.codepoints/1)
 
     capture_lists
