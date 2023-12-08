@@ -17,51 +17,60 @@ defmodule Advent2023.Day3 do
   @special_chars ["-", "*", "/", "#", "&", "+", "@", "=", "$", "%"]
 
   def c2 do
-    data =
-      @test |> Enum.into([], & &1)
+    data = @data |> Enum.into([], &String.trim(&1, "\n"))
 
-    meta =
       Enum.with_index(data)
-      |> Enum.flat_map(fn {line, y} ->
-        case String.split(line, "", trim: true) |> Enum.find_index(&(&1 == "*")) do
-          nil -> []
-          x -> [{x, y}]
+      |> Enum.into(
+        [],
+        fn {line, y} ->
+          row = String.split(line, "", trim: true)
+
+          {Enum.find_index(row, &(&1 == "*")), y}
         end
-      end)
-
-    Enum.into(meta, [], fn {x, y} ->
-      row = Enum.at(data, y)
-
-      y_range =
-        case y do
-          0 -> 0..1
-          i when i < byte_size(row) -> (i - 1)..(i + 1)
-          i when i == byte_size(row) -> (i - 1)..i
+      )
+      |> Enum.filter(fn {x, _y} -> x != nil end)
+      |> Enum.into(
+        [],
+        fn {x, y} ->
+          {
+            x, y,
+            Enum.into(
+              safe_range(data, y),
+              [],
+              &(
+                Enum.at(data, &1)
+                |> parse_row(&1)
+                |> Enum.filter(fn {_match, xF, xL} -> (xF in [x-1, x, x+1] or xL in [x-1, x, x+1]) end)
+              ))
+              |> Enum.filter(& &1 != [])
+              |> List.flatten()
+            }
         end
+      )
+      |> Enum.filter(fn {_star_x, _star_y, captures} -> length(captures) == 2 end)
+  end
 
-      region = Enum.slice(data, y_range)
+  def parse_row(row, i), do: parse_row({row, i})
+  @spec parse_row({binary(), any()}) :: [{bitstring(), non_neg_integer(), integer()}]
+  def parse_row({row, _i}) do
+    do_parse_row(row, 0, "", 0)
+  end
 
-      Enum.map(region, fn row_slice ->
-        row_slice
-        |> String.codepoints()
-        |> Enum.chunk_by(fn <<char::utf8>> -> char in ?0..?9 end)
-        |> Enum.filter(fn chunk ->
-          case List.first(chunk) do
-            <<char::utf8>> -> char in ?0..?9
-            _ -> false
-          end
-        end)
-        |> Enum.map(&Enum.join/1)
-      end)
-      |> Enum.filter(fn matches -> length(matches) == 2 end)
-      |> Enum.into([], fn [m1, m2] ->
-        m1 = m1 |> String.to_integer()
-        m2 = m2 |> String.to_integer()
-        m1 * m2
-      end)
-    end)
-    |> List.flatten()
-    |> Enum.sum()
+  defp do_parse_row("", _index, _digits, _start_index), do: []
+
+  defp do_parse_row(<<digit::utf8, rest::binary>>, index, "", _start_index) when digit in ?0..?9,
+    do: do_parse_row(rest, index + 1, <<digit::utf8>>, index)
+
+  defp do_parse_row(<<digit::utf8, rest::binary>>, index, digits, start_index)
+       when digit in ?0..?9,
+       do: do_parse_row(rest, index + 1, digits <> <<digit::utf8>>, start_index)
+
+  defp do_parse_row(<<_::utf8, rest::binary>>, index, "", _start_index),
+    do: do_parse_row(rest, index + 1, "", index + 1)
+
+  defp do_parse_row(<<_::utf8, rest::binary>>, index, digits, start_index) do
+    [{digits, start_index, index - 1} | do_parse_row(rest, index + 1, "", index + 1)]
+    |> Enum.filter(&(&1 != nil))
   end
 
   def c1 do
@@ -80,7 +89,7 @@ defmodule Advent2023.Day3 do
       y_range = safe_range(data, y)
 
       capture_list
-      |> Enum.filter(fn {capture, x_first, x_last} ->
+      |> Enum.filter(fn {_capture, x_first, x_last} ->
         x_first = if x_first == 0, do: 0, else: x_first - 1
         x_last = if x_last == length(Enum.at(data, y)), do: x_last, else: x_last + 1
 
@@ -107,23 +116,4 @@ defmodule Advent2023.Day3 do
     end
   end
 
-  @spec parse_row({binary(), any()}) :: [{bitstring(), non_neg_integer(), integer()}]
-  def parse_row({row, _i}) do
-    do_parse_row(row, 0, "", 0)
-  end
-
-  defp do_parse_row("", _index, _digits, _start_index), do: []
-
-  defp do_parse_row(<<digit::utf8, rest::binary>>, index, "", _start_index) when digit in ?0..?9,
-    do: do_parse_row(rest, index + 1, <<digit::utf8>>, index)
-
-  defp do_parse_row(<<digit::utf8, rest::binary>>, index, digits, start_index)
-       when digit in ?0..?9,
-       do: do_parse_row(rest, index + 1, digits <> <<digit::utf8>>, start_index)
-
-  defp do_parse_row(<<_::utf8, rest::binary>>, index, "", _start_index),
-    do: do_parse_row(rest, index + 1, "", index + 1)
-
-  defp do_parse_row(<<_::utf8, rest::binary>>, index, digits, start_index),
-    do: [{digits, start_index, index - 1} | do_parse_row(rest, index + 1, "", index + 1)]
 end
