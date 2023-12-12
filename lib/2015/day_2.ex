@@ -1,4 +1,4 @@
-defmodule Advent2015.Day2 do
+defmodule Day2_2015 do
   @data "./data/2015/day2.txt" |> File.read!()
 
   def order() do

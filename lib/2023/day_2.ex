@@ -1,4 +1,4 @@
-defmodule Advent2023.Day2 do
+defmodule Day2_2023 do
   @data File.stream!("./data/2023/day_2.txt")
 
   defmodule Game do
@@ -8,7 +8,7 @@ defmodule Advent2023.Day2 do
     ]
   end
 
-  alias Advent2023.Day2.Game, as: Game
+  alias Day2_2023.Game, as: Game
 
   def parse(game) do
     [game, sets] =

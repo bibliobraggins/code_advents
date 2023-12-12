@@ -1,4 +1,4 @@
-defmodule Admin2015.Day1 do
+defmodule Day1_2015 do
   @data File.read!(File.cwd!() <> "/data/2015/day1.txt")
 
   def total() do
